@@ -16,20 +16,32 @@ def chat(messages):
     key = get_key()
     if not key:
         raise ValueError("Missing GROQ_API_KEY. Add it to Streamlit app secrets.")
-    response = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-        json={"model": "llama-3.3-70b-versatile", "messages": messages, "temperature": 0.5},
-        timeout=90,
-    )
-    if not response.ok:
+    models = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
+    for model in models:
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            json={"model": model, "messages": messages, "temperature": 0.5},
+            timeout=90,
+        )
+        if response.ok:
+            return response.json()["choices"][0]["message"]["content"]
+        try:
+            error = response.json().get("error", {})
+            code = error.get("code", "")
+            detail = error.get("message", "")
+        except (ValueError, AttributeError):
+            code, detail = "", ""
         if response.status_code == 401:
-            raise ValueError("Invalid API key. Check your Streamlit secrets.")
+            raise ValueError("Invalid Groq API key. Check Streamlit Secrets.")
         if response.status_code == 429:
-            raise ValueError("API rate limit reached. Please try again later.")
-        raise ValueError(f"AI service error ({response.status_code}). Please try again.")
-    data = response.json()
-    return data["choices"][0]["message"]["content"]
+            raise ValueError("Groq API rate limit reached. Try again later.")
+        if response.status_code == 404 and ("model" in str(code).lower() or "model" in str(detail).lower()):
+            continue
+        if response.status_code == 404:
+            raise ValueError("Groq returned 404 (resource not found). Check that the API key belongs to Groq and the provider endpoint is accessible.")
+        raise ValueError(f"Groq API error ({response.status_code}): {str(detail)[:250] or 'Please try again.'}")
+    raise ValueError("Neither configured Groq model is available to this account.")
 
 SYSTEM = (
     "You are a practical travel planning assistant. Create clear day-by-day plans, "
