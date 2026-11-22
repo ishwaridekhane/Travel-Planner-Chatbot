@@ -48,7 +48,12 @@ SYSTEM = (
     "transport suggestions, meals, and a budget breakdown in INR. Clearly label all "
     "prices and travel times as estimates; do not claim live availability, verified "
     "opening hours, or real-time prices. If a budget is unrealistic, say so and "
-    "suggest alternatives. Keep follow-up answers consistent with the trip details."
+    "suggest alternatives. Keep follow-up answers consistent with the trip details. "
+    "FORMAT STRICTLY: use Markdown headings (## Day 1, ## Day 2, etc.), short bullet lists "
+    "for Morning, Afternoon and Evening, and a simple itemized budget list. "
+    "NEVER use Markdown tables, HTML tags, or <br> line breaks. "
+    "Include every requested day and finish with a budget total and safety tips. "
+    "Avoid invented exact schedules and overly precise prices."
 )
 
 with st.sidebar:
@@ -84,7 +89,8 @@ if generate:
             f"Pace: {pace}. Provide a day-by-day morning/afternoon/evening itinerary, "
             "suggested local transport, meals, estimated accommodation/food/transport/"
             "activities costs with a total, and practical safety tips. "
-            "If origin is unspecified, exclude intercity transport from the budget and state that."
+            "If origin is unspecified, exclude intercity transport from the budget and state that. "
+            "Use clear headings and bullets only; no tables, HTML, or <br> tags."
         )
         conversation = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}]
         with st.spinner("Planning your trip..."):
