@@ -16,7 +16,7 @@ def chat(messages):
     key = get_key()
     if not key:
         raise ValueError("Missing GROQ_API_KEY. Add it to Streamlit app secrets.")
-    models = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
+    models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b"]
     for model in models:
         response = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
